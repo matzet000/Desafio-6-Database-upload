@@ -43,7 +43,7 @@ class CreateTransactionService {
         title,
         value,
         type,
-        category_id: categoryCreated.id,
+        category_id: categoryCreated.id as string,
       });
 
       await transactionsRepository.save(categoryCreated);
@@ -51,12 +51,14 @@ class CreateTransactionService {
       return transaction as Transaction;
     }
 
-    const transaction = await transactionsRepository.create({
+    const tmep = {
       title,
       value,
       type,
-      category_id: categoryExists.id,
-    });
+      category_id: categoryExists.id as string,
+    } as Transaction;
+
+    const transaction = await transactionsRepository.create();
 
     await transactionsRepository.save(transaction);
 

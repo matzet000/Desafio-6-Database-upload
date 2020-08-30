@@ -9,7 +9,7 @@ import AppError from './errors/AppError';
 
 import createConnection from './database';
 
-createConnection();
+createConnection().then(connection => connection.synchronize());
 const app = express();
 
 app.use(express.json());
