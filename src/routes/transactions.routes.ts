@@ -11,10 +11,9 @@ const transactionsRouter = Router();
 
 transactionsRouter.get('/', async (request, response) => {
   const transactionsRepository = getCustomRepository(TransactionsRepository);
-  const allTransactions = transactionsRepository.find();
-  const balance = transactionsRepository.getBalance();
-
-  return response.json({ transactions: allTransactions, balance });
+  const transactions = await transactionsRepository.find();
+  const balance = await transactionsRepository.getBalance();
+  return response.json({ transactions, balance });
 });
 
 transactionsRouter.post('/', async (request, response) => {
@@ -38,7 +37,7 @@ transactionsRouter.delete('/:id', async (request, response) => {
   const deleteTransaction = new DeleteTransactionService();
   await deleteTransaction.execute(id);
 
-  return response.status(204);
+  return response.status(204).send();
 });
 
 transactionsRouter.post('/import', async (request, response) => {

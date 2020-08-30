@@ -21,9 +21,9 @@ class TransactionsRepository extends Repository<Transaction> {
 
     allTransactions.forEach(transaction => {
       if (transaction.type === 'income') {
-        balance.income += transaction.value;
+        balance.income += Number(transaction.value);
       } else if (transaction.type === 'outcome') {
-        balance.outcome += transaction.value;
+        balance.outcome += Number(transaction.value);
       }
     });
 

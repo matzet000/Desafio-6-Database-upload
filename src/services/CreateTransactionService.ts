@@ -10,7 +10,7 @@ import TransactionsRepository from '../repositories/TransactionsRepository';
 interface Request {
   title: string;
   value: number;
-  type: string;
+  type: 'income' | 'outcome';
   category: string;
 }
 
@@ -24,45 +24,38 @@ class CreateTransactionService {
     const transactionsRepository = getCustomRepository(TransactionsRepository);
     const categoriesRepository = getRepository(Category);
 
+    const { total } = await transactionsRepository.getBalance();
+
     if (type !== 'income' && type !== 'outcome') {
-      throw new AppError('Invalid type form');
+      throw new AppError('Invalid type format');
     }
 
-    const categoryExists = categoriesRepository.findOne({
-      where: { category },
+    if (type === 'outcome' && total < value) {
+      throw new AppError('Invalid value value above total');
+    }
+
+    let categoryTransaction = await categoriesRepository.findOne({
+      where: { title: category },
     });
 
-    if (!categoryExists) {
-      const categoryCreated = categoriesRepository.create({
+    if (!categoryTransaction) {
+      categoryTransaction = await categoriesRepository.create({
         title: category,
       });
 
-      await categoriesRepository.save(categoryCreated);
-
-      const transaction = await transactionsRepository.create({
-        title,
-        value,
-        type,
-        category_id: categoryCreated.id as string,
-      });
-
-      await transactionsRepository.save(categoryCreated);
-
-      return transaction as Transaction;
+      await categoriesRepository.save(categoryTransaction);
     }
 
-    const tmep = {
+    const transaction = await transactionsRepository.create({
       title,
       value,
       type,
-      category_id: categoryExists.id as string,
-    } as Transaction;
-
-    const transaction = await transactionsRepository.create();
+      category: categoryTransaction,
+    });
 
     await transactionsRepository.save(transaction);
 
-    return transaction as Transaction;
+    return transaction;
   }
 }
 
